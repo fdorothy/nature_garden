@@ -15,6 +15,11 @@
  <tile id="18" terrain="0,1,0,1"/>
  <tile id="19" terrain="0,1,0,0"/>
  <tile id="20" terrain="1,0,0,0"/>
+ <tile id="22">
+  <properties>
+   <property name="groundType" value="grass"/>
+  </properties>
+ </tile>
  <tile id="32" terrain="1,0,1,1"/>
  <tile id="33" terrain="0,0,1,1"/>
  <tile id="34" terrain="0,1,1,1"/>
