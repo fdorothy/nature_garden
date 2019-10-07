@@ -30,13 +30,17 @@ namespace NG
         public ParticleSystem beeSystem;
         public ParticleSystem cowSystem;
 
+        public bool isPlaying = false;
+
+        public Transform introTransform;
+        public Transform winTransform;
+
         // Start is called before the first frame update
         void Start()
         {
             findGroundCells();
             camera = Camera.main;
             UpdateFertilizerText();
-            StartCoroutine(SpawnRoutine());
         }
 
         void Update()
@@ -62,6 +66,10 @@ namespace NG
                 {
                     PickPlants(hoverGround);
                 }
+            }
+
+            if (fertilizer > 500) {
+                WinGame();
             }
         }
 
@@ -197,7 +205,8 @@ namespace NG
         public IEnumerator BeeRoutine()
         {
             beeSystem.Play();
-            for (int i=0; i<10; i++) {
+            for (int i = 0; i < 10; i++)
+            {
                 spawnPlant(plantPrefabs[0], 0.0f);
                 yield return new WaitForSeconds(1.0f);
             }
@@ -207,12 +216,42 @@ namespace NG
         public IEnumerator CowRoutine()
         {
             cowSystem.Play();
-            for (int i=0; i<10; i++) {
+            for (int i = 0; i < 10; i++)
+            {
                 spawnPlant(plantPrefabs[1], 0.0f);
                 yield return new WaitForSeconds(1.0f);
             }
             cowSystem.Stop();
             isCowing = false;
+        }
+
+        public void StartGame()
+        {
+            if (!isPlaying)
+            {
+                introTransform.gameObject.SetActive(false);
+                isPlaying = true;
+                UpdateFertilizerText();
+                StartCoroutine(SpawnRoutine());
+            }
+        }
+
+        public void WinGame()
+        {
+            if (isPlaying)
+            {
+                winTransform.gameObject.SetActive(true);
+                isPlaying = false;
+                StopCoroutine(SpawnRoutine());
+            }
+        }
+
+        public void RestartGame() {
+            winTransform.gameObject.SetActive(false);
+            introTransform.gameObject.SetActive(true);
+            isPlaying = false;
+            fertilizer = 0;
+            UpdateFertilizerText();
         }
     }
 }
