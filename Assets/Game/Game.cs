@@ -20,6 +20,16 @@ namespace NG
 
         public int fertilizer = 0;
 
+        public float spawnRate = 1.0f;
+
+        public bool isRaining = false;
+        public bool isBeeing = false;
+        public bool isCowing = false;
+
+        public ParticleSystem rainSystem;
+        public ParticleSystem beeSystem;
+        public ParticleSystem cowSystem;
+
         // Start is called before the first frame update
         void Start()
         {
@@ -114,7 +124,7 @@ namespace NG
         {
             while (true)
             {
-                yield return new WaitForSeconds(1.0f);
+                yield return new WaitForSeconds(spawnRate);
                 spawnPlants();
             }
         }
@@ -124,19 +134,85 @@ namespace NG
             foreach (Plant plantPrefab in plantPrefabs)
             {
                 float t = Random.Range(0.0f, 1.0f);
-                if (t < plantPrefab.probability)
+                spawnPlant(plantPrefab, t);
+            }
+        }
+
+        public void spawnPlant(Plant plantPrefab, float t)
+        {
+            if (t < plantPrefab.probability)
+            {
+                // spawn this plant somewhere
+                int i = (int)Random.Range(0, ground.Count);
+                Ground g = ground[i];
+                if (g.plant == null)
                 {
-                    // spawn this plant somewhere
-                    int i = (int)Random.Range(0, ground.Count);
-                    Ground g = ground[i];
-                    if (g.plant == null)
-                    {
-                        Plant p = (Plant)Instantiate(plantPrefab);
-                        p.GetComponent<SpriteRenderer>().sortingOrder = 10;
-                        g.placePlant(p);
-                    }
+                    Plant p = (Plant)Instantiate(plantPrefab);
+                    p.GetComponent<SpriteRenderer>().sortingOrder = 10;
+                    g.placePlant(p);
                 }
             }
+        }
+
+        public void StartRain()
+        {
+            if (!isRaining && fertilizer > 5)
+            {
+                isRaining = true;
+                fertilizer -= 5;
+                UpdateFertilizerText();
+                StartCoroutine(RainRoutine());
+            }
+        }
+        public void StartBees()
+        {
+            if (!isBeeing && fertilizer > 15)
+            {
+                isBeeing = true;
+                fertilizer -= 15;
+                UpdateFertilizerText();
+                StartCoroutine(BeeRoutine());
+            }
+        }
+        public void StartCows()
+        {
+            if (!isCowing && fertilizer > 25)
+            {
+                isCowing = true;
+                fertilizer -= 25;
+                UpdateFertilizerText();
+                StartCoroutine(CowRoutine());
+            }
+        }
+
+        public IEnumerator RainRoutine()
+        {
+            rainSystem.Play();
+            spawnRate = 0.25f;
+            yield return new WaitForSeconds(10.0f);
+            spawnRate = 1.0f;
+            rainSystem.Stop();
+            isRaining = false;
+        }
+        public IEnumerator BeeRoutine()
+        {
+            beeSystem.Play();
+            for (int i=0; i<10; i++) {
+                spawnPlant(plantPrefabs[0], 0.0f);
+                yield return new WaitForSeconds(1.0f);
+            }
+            beeSystem.Stop();
+            isBeeing = false;
+        }
+        public IEnumerator CowRoutine()
+        {
+            cowSystem.Play();
+            for (int i=0; i<10; i++) {
+                spawnPlant(plantPrefabs[1], 0.0f);
+                yield return new WaitForSeconds(1.0f);
+            }
+            cowSystem.Stop();
+            isCowing = false;
         }
     }
 }
